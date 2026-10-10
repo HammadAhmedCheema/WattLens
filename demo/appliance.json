@@ -1,0 +1,5 @@
+{
+  "provenance":"synthetic_placeholder",
+  "model_name":"qwen3-vl:4b",
+  "output":{"category":"fan","brand":"WattLens Example","model":"DEMO-F70","label_type":"nameplate_only","annual_kwh":null,"rated_power_w":70,"voltage_v":230,"current_a":0.4,"rating":null,"capacity":null,"visible_text":["SYNTHETIC TEST LABEL","WattLens Example Fan","Rated electrical input: 70 W","Voltage: 230 V","Current: 0.4 A"],"field_status":{"annual_kwh":"absent","rated_power_w":"read","voltage_v":"read","current_a":"read","category":"read"}}
+}

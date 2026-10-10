@@ -1,0 +1,95 @@
+{
+  "model": "qwen/qwen3-vl-8b-instruct",
+  "provider": "openrouter",
+  "samples": "bundled synthetic images",
+  "steps": [
+    {
+      "step": "live_label_two_step_extraction",
+      "seconds": 12.13,
+      "passed": true,
+      "fields": {
+        "category": "fan",
+        "brand": null,
+        "model": "DEMO-F70",
+        "label_type": null,
+        "annual_kwh": null,
+        "rated_power_w": 70.0,
+        "voltage_v": 230.0,
+        "current_a": 0.4,
+        "rating": null,
+        "capacity": null,
+        "visible_text": [
+          "SYNTHETIC TEST LABEL",
+          "WattLens Example Fan",
+          "MODEL: DEMO-F70",
+          "Rated electrical input: 70 W",
+          "Voltage: 230 V",
+          "Current: 0.4 A"
+        ],
+        "field_status": {
+          "category": "read",
+          "brand": "absent",
+          "model": "read",
+          "label_type": "absent",
+          "annual_kwh": "absent",
+          "rated_power_w": "read",
+          "voltage_v": "read",
+          "current_a": "read",
+          "rating": "absent",
+          "capacity": "absent"
+        }
+      }
+    },
+    {
+      "step": "live_bill_two_step_extraction",
+      "seconds": 11.52,
+      "passed": true,
+      "fields": {
+        "billing_month": "2026-10",
+        "units_kwh": 250.0,
+        "total_amount": 10000.0,
+        "tariff_text": "Residential A-1",
+        "previous_month_units": 220.0,
+        "visible_text": [
+          "Billing month: 2026-10",
+          "Current consumption: 250 kWh",
+          "Total payable: PKR 10000",
+          "Tariff: Residential A-1",
+          "Previous month: 220 kWh"
+        ],
+        "field_status": {
+          "billing_month": "read",
+          "units_kwh": "read",
+          "total_amount": "read",
+          "tariff_text": "read",
+          "previous_month_units": "read"
+        }
+      }
+    },
+    {
+      "step": "live_grounded_brief_and_saved_snapshot",
+      "seconds": 3.87,
+      "passed": true,
+      "fields": {
+        "headline": "Household energy estimate shows significant gap between billed and estimated usage",
+        "findings": [
+          "Estimated total energy use is 16.8 kWh, far below the billed 250.0 kWh",
+          "The gap of 233.2 kWh suggests unaccounted consumption or estimation error",
+          "Coverage at 6.72% indicates the estimate explains only a small portion of billed usage"
+        ],
+        "actions": [
+          "Review appliance usage logs to identify unaccounted devices",
+          "Check for phantom loads or misreported appliance power ratings",
+          "Compare estimated cost of 672.0 with actual bill to assess accuracy"
+        ],
+        "caveats": [
+          "All appliance figures are estimates from labels, usage, and editable defaults",
+          "Range bands are assumptions, not statistical confidence intervals",
+          "The estimate uses annual kWh divided by twelve or a standardized thirty day month",
+          "All appliance figures are estimates from labels, user-entered hours, and editable defaults."
+        ]
+      }
+    }
+  ],
+  "passed": true
+}

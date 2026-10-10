@@ -1,17 +1,12 @@
-# Environment variables & secrets
+uploads/
+*.db
+*.db-*
 .env
-*.env
-
-# Python virtual environment & cache
+__pycache__/
+*.py[cod]
 .venv/
 venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# OS & Editor
+env/
+.pytest_cache/
+*.log
 .DS_Store
-Thumbs.db
-.vscode/
-.idea/

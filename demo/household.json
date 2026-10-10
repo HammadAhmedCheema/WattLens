@@ -1,0 +1,11 @@
+{
+  "provenance": "synthetic_placeholder",
+  "appliances": [
+    {"name":"Living room AC","category":"air_conditioner","rated_power_w":1200,"hours_per_day":6,"load_factor":0.55,"quantity":1},
+    {"name":"Kitchen refrigerator","category":"refrigerator","annual_kwh":360,"hours_per_day":24,"load_factor":0.55,"quantity":1},
+    {"name":"Ceiling fans","category":"fan","rated_power_w":70,"hours_per_day":8,"load_factor":1,"quantity":3},
+    {"name":"LED lights","category":"light","rated_power_w":12,"hours_per_day":5,"load_factor":1,"quantity":8},
+    {"name":"Television","category":"tv","rated_power_w":120,"hours_per_day":4,"load_factor":1,"quantity":1}
+  ],
+  "bill":{"billing_month":"2026-10","units_kwh":250,"total_amount":10000,"tariff_text":"Synthetic residential bill","previous_month_units":220}
+}

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}WattLens · Home energy audit{% endblock %}</title>
+<link rel="stylesheet" href="/static/style.css"><script src="/static/vendor/htmx.min.js" defer></script>
+<script src="/static/vendor/chart.umd.js" defer></script><script id="category-defaults" type="application/json">{{ defaults|tojson }}</script><script src="/static/app.js" defer></script></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<aside class="sidebar"><a class="brand" href="/"><span class="brand-icon">W</span> WattLens<span class="brand-dot"></span></a>
+<p class="sidebar-label">YOUR HOME, IN FOCUS</p><nav aria-label="Main navigation"><a href="/" class="{% if active=='home' %}active{% endif %}">＋ &nbsp; Add appliances</a><a href="/dashboard" class="{% if active=='dashboard' %}active{% endif %}">▥ &nbsp; Energy dashboard</a><a href="/bills" class="{% if active=='bills' %}active{% endif %}">▤ &nbsp; Electricity bills</a><a href="/analysis" class="{% if active=='analysis' %}active{% endif %}">◎ &nbsp; Household brief</a></nav>
+<div class="sidebar-bottom"><div class="local-badge"><span class="status-dot"></span> Your home energy audit</div><p>Live uploads are sent to OpenRouter<br>for AI processing. Review before saving.</p><form method="post" action="/mode"><input type="hidden" name="mode" value="{{ 'live' if demo else 'demo' }}"><button class="mode-button">{{ 'Switch to live mode' if demo else 'Explore demo household' }}</button></form></div></aside>
+<div class="workspace"><header class="topbar"><span>HOUSEHOLD ENERGY AUDIT</span><a href="/healthz" target="_blank" class="runtime-status" id="runtime-status">Check AI configuration ↗</a></header>
+{% if demo %}<div class="demo-banner" role="status"><strong>Demo Mode: saved model outputs</strong> · Synthetic household fixtures. Uploads replay saved examples, not the uploaded image.</div>{% endif %}
+<main id="main">{% block content %}{% endblock %}</main>
+<footer>Model: {{ model_name }} · 8B vision-language model · served through OpenRouter <span>Estimates, not live measurements.</span></footer></div>
+<div id="toast" role="status" aria-live="polite"></div>
+{% block scripts %}{% endblock %}</body></html>

@@ -1,0 +1,5 @@
+{
+  "provenance":"synthetic_placeholder",
+  "model_name":"qwen3-vl:4b",
+  "output":{"billing_month":"2026-10","units_kwh":250,"total_amount":10000,"tariff_text":"Synthetic residential bill","previous_month_units":220,"visible_text":["SYNTHETIC ELECTRICITY BILL","Billing month: 2026-10","Current consumption: 250 kWh","Total payable: PKR 10000","Previous month: 220 kWh"],"field_status":{"units_kwh":"read","total_amount":"read","billing_month":"read"}}
+}

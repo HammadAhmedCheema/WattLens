@@ -1,0 +1,5 @@
+{
+  "provenance":"synthetic_placeholder",
+  "model_name":"qwen3-vl:4b",
+  "output":{"headline":"Start with your largest estimated users","findings":["The AC is the largest estimated contributor in this synthetic household.","The estimate depends on operating hours and load factors, especially for cooling appliances.","The gap to the bill is a reason to review inputs, not evidence of a particular cause."],"actions":["Review the AC schedule and effective load assumption before making changes.","Check the refrigerator label and door seals without interrupting refrigeration.","Add missing household loads and check the bill period length."],"caveats":["This is a saved synthetic placeholder brief, not measured accuracy or live model output.","Range bands are assumptions rather than statistical confidence intervals."]}
+}
