@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WattWise - Intelligent Electricity Unit Planner</title>
+  <meta name="description" content="WattWise helps you scan appliance datasheets, calculate monthly electricity consumption, and generate an AI-powered unit reduction plan to meet your energy targets.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>WattWise</h1>
+          <span class="brand-tag">Electricity Unit Planner</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="badge badge-pulse" id="backendStatusBadge">
+          <span class="status-dot"></span>
+          <span id="backendStatusText">Checking Status...</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+    <!-- Stepper Navigation -->
+    <nav class="stepper-nav" aria-label="Planning Progress">
+      <div class="step-item active" id="stepIndicator1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Upload Labels</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" id="stepIndicator2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Appliances & Usage</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" id="stepIndicator3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Target Goal</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" id="stepIndicator4">
+        <div class="step-circle">4</div>
+        <div class="step-label">Smart Reduction</div>
+      </div>
+    </nav>
+
+    <!-- Global Alert / Notification Area -->
+    <div id="notificationArea" class="notification-container" style="display: none;"></div>
+
+    <!-- STEP 1: UPLOAD -->
+    <section id="step1View" class="step-view active">
+      <div class="card main-card">
+        <div class="card-header">
+          <div class="card-icon-pill">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+            </svg>
+          </div>
+          <div>
+            <h2>Step 1: Upload Appliance Datasheets or Labels</h2>
+            <p class="subtitle">Snap photos of power rating stickers, energy star labels, or datasheets. The vision model will detect device names and wattages.</p>
+          </div>
+        </div>
+
+        <div class="upload-dropzone" id="dropzone">
+          <input type="file" id="fileInput" multiple accept="image/*" class="file-input-hidden">
+          <div class="dropzone-content">
+            <div class="dropzone-icon">
+              <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+            </div>
+            <h3>Drag & Drop appliance label photos here</h3>
+            <p>PNG, JPG, JPEG up to 25MB total. Multiple photos supported.</p>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseFiles">Browse Photos</button>
+          </div>
+        </div>
+
+        <!-- Selected files preview list -->
+        <div id="filePreviewContainer" class="file-preview-list" style="display: none;">
+          <div class="file-preview-header">
+            <span class="preview-count" id="fileCountBadge">0 images selected</span>
+            <button type="button" class="btn-text text-danger" id="btnClearFiles">Clear All</button>
+          </div>
+          <div id="fileTagsWrapper" class="file-tags-wrapper"></div>
+        </div>
+
+        <div class="card-footer actions-bar">
+          <button type="button" class="btn btn-secondary" id="btnSkipManual">
+            Skip to Manual Entry
+          </button>
+          <button type="button" class="btn btn-primary" id="btnScanLabels" disabled>
+            <span class="btn-text-content">Scan Labels & Extract</span>
+            <span class="spinner" style="display: none;"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: EDITABLE APPLIANCES TABLE -->
+    <section id="step2View" class="step-view">
+      <div class="card main-card">
+        <div class="card-header justify-between">
+          <div>
+            <h2>Step 2: Appliance Inventory & Daily Usage</h2>
+            <p class="subtitle">Review extracted wattages, set your typical daily operating hours, and flag essential devices (e.g. medical, fridge).</p>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">Baseline Monthly Units</span>
+            <span class="stat-value text-accent" id="liveBaselineUnits">0.00</span>
+            <span class="stat-unit">kWh</span>
+          </div>
+        </div>
+
+        <div class="table-actions-toolbar">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnAddApplianceRow">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Appliance
+          </button>
+          <div class="table-legend">
+            <span class="legend-badge"><span class="check-box-preview checked"></span> Essential: Protected from cuts</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="appliancesTable">
+            <thead>
+              <tr>
+                <th style="width: 32%;">Appliance Name</th>
+                <th style="width: 18%;">Power (Watts)</th>
+                <th style="width: 18%;">Hours / Day</th>
+                <th style="width: 12%; text-align: center;">Essential?</th>
+                <th style="width: 14%; text-align: right;">Monthly Units</th>
+                <th style="width: 6%; text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="appliancesTableBody">
+              <!-- Dynamically rendered rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-summary-bar">
+          <div class="formula-hint">
+            <strong>Formula:</strong> Watts &times; Hours &times; 30 days &divide; 1000 = Monthly kWh (Units)
+          </div>
+          <div class="summary-total">
+            <span>Total Estimated Consumption:</span>
+            <strong id="tableSummaryUnits">0.00 kWh / month</strong>
+          </div>
+        </div>
+
+        <div class="card-footer actions-bar">
+          <button type="button" class="btn btn-secondary" id="btnBackToStep1">
+            &larr; Back to Upload
+          </button>
+          <button type="button" class="btn btn-primary" id="btnProceedToGoal">
+            Set Reduction Target &rarr;
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: GOAL & LLM PLANNING -->
+    <section id="step3View" class="step-view">
+      <div class="card main-card">
+        <div class="card-header">
+          <div class="card-icon-pill">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+            </svg>
+          </div>
+          <div>
+            <h2>Step 3: Define Monthly Electricity Unit Goal</h2>
+            <p class="subtitle">Enter your target monthly consumption. Local AI will analyze your usage patterns and calculate the optimal reduction plan.</p>
+          </div>
+        </div>
+
+        <div class="goal-grid">
+          <div class="goal-stat-card current-baseline">
+            <span class="card-sub">Current Baseline Consumption</span>
+            <div class="big-metric">
+              <span id="goalBaselineDisplay">0.00</span>
+              <small>kWh / mo</small>
+            </div>
+            <p class="metric-note">Calculated from your Step 2 appliance inventory.</p>
+          </div>
+
+          <div class="goal-input-card">
+            <label for="targetUnitsInput" class="input-label">Target Monthly Units (kWh):</label>
+            <div class="input-unit-wrapper">
+              <input type="number" id="targetUnitsInput" class="form-input large-input" min="1" max="99999" step="1" placeholder="e.g. 250">
+              <span class="unit-tag">kWh</span>
+            </div>
+
+            <div class="quick-presets">
+              <span class="preset-label">Quick Reductions:</span>
+              <button type="button" class="btn-preset" data-pct="10">-10% Cut</button>
+              <button type="button" class="btn-preset" data-pct="20">-20% Cut</button>
+              <button type="button" class="btn-preset" data-pct="30">-30% Cut</button>
+            </div>
+
+            <div id="goalDeltaNotice" class="delta-notice">
+              <!-- Dynamically updated reduction delta -->
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer actions-bar">
+          <button type="button" class="btn btn-secondary" id="btnBackToStep2">
+            &larr; Back to Inventory
+          </button>
+          <button type="button" class="btn btn-primary" id="btnGeneratePlan">
+            <span class="btn-text-content">Generate Reduction Plan</span>
+            <span class="spinner" style="display: none;"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4: EDIT & AFFIRM PLAN -->
+    <section id="step4View" class="step-view">
+      <div class="card main-card">
+        <div class="card-header justify-between">
+          <div>
+            <h2>Step 4: Smart Reduction Plan & Fine-Tuning</h2>
+            <p class="subtitle">Review the AI recommendations. You can tweak the proposed daily hours; totals and target indicators adjust live.</p>
+          </div>
+          <div class="status-indicator-box" id="targetStatusIndicator">
+            <div class="status-indicator-title">Plan Status</div>
+            <div class="status-pill-badge" id="targetStatusBadge">Calculating...</div>
+          </div>
+        </div>
+
+        <!-- Metrics comparison bar -->
+        <div class="metrics-bar">
+          <div class="metric-item">
+            <span class="m-label">Baseline Units</span>
+            <span class="m-val" id="planBaselineVal">0.00 kWh</span>
+          </div>
+          <div class="metric-divider">&rarr;</div>
+          <div class="metric-item">
+            <span class="m-label">Target Goal</span>
+            <span class="m-val text-primary" id="planTargetVal">0.00 kWh</span>
+          </div>
+          <div class="metric-divider">=</div>
+          <div class="metric-item">
+            <span class="m-label">Live Planned Total</span>
+            <span class="m-val" id="planCurrentLiveVal">0.00 kWh</span>
+          </div>
+          <div class="metric-divider">|</div>
+          <div class="metric-item">
+            <span class="m-label">Total Monthly Savings</span>
+            <span class="m-val text-success" id="planTotalSavedVal">0.00 kWh</span>
+          </div>
+        </div>
+
+        <!-- Plan Table: Only new_hours is editable -->
+        <div class="table-responsive">
+          <table class="data-table" id="planTable">
+            <thead>
+              <tr>
+                <th style="width: 30%;">Appliance</th>
+                <th style="width: 15%;">Power (Watts)</th>
+                <th style="width: 15%;">Original Hours</th>
+                <th style="width: 20%;">Planned Hours/Day (Editable)</th>
+                <th style="width: 20%; text-align: right;">Monthly Units Saved</th>
+              </tr>
+            </thead>
+            <tbody id="planTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- LLM Explanation and Actionable Tips -->
+        <div class="llm-insight-card">
+          <div class="insight-header">
+            <div class="ai-spark-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+              </svg>
+            </div>
+            <h3>Ollama AI Consumption Analysis & Recommendations</h3>
+          </div>
+          <p class="insight-text" id="llmExplanationText">Loading analysis...</p>
+
+          <div class="tips-section">
+            <h4 class="tips-title">Top 3 Energy Saving Tips:</h4>
+            <ul class="tips-list" id="llmTipsList">
+              <!-- Dynamically populated tips -->
+            </ul>
+          </div>
+        </div>
+
+        <div class="card-footer actions-bar">
+          <button type="button" class="btn btn-secondary" id="btnBackToStep3">
+            &larr; Back to Goal
+          </button>
+          <button type="button" class="btn btn-success" id="btnConfirmPlan">
+            Confirm Plan &rarr;
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 5: FINAL CONFIRMED SUMMARY & EXPORT (MODAL / FULL SCREEN OVERLAY) -->
+    <section id="summaryModal" class="summary-overlay" style="display: none;">
+      <div class="summary-card print-area">
+        <div class="summary-header">
+          <div class="summary-branding">
+            <div class="logo-icon small">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+            <div>
+              <h2>WattWise Electricity Reduction Plan</h2>
+              <span class="plan-date" id="summaryDateStamp">Generated on October 2026</span>
+            </div>
+          </div>
+          <div class="summary-actions no-print">
+            <button type="button" class="btn btn-secondary btn-sm" id="btnCloseSummary">&times; Close</button>
+          </div>
+        </div>
+
+        <div class="summary-banner" id="summaryStatusBanner">
+          <div class="banner-title" id="summaryBannerTitle">Target Achieved</div>
+          <p id="summaryBannerSubtitle">Your planned schedule keeps your household well within your monthly energy budget.</p>
+        </div>
+
+        <!-- Metric comparison card -->
+        <div class="summary-metrics-grid">
+          <div class="summary-metric">
+            <span class="sm-label">Baseline Units</span>
+            <strong class="sm-value" id="sumBaseline">0.00 kWh</strong>
+          </div>
+          <div class="summary-metric">
+            <span class="sm-label">Target Units</span>
+            <strong class="sm-value" id="sumTarget">0.00 kWh</strong>
+          </div>
+          <div class="summary-metric">
+            <span class="sm-label">Confirmed Units</span>
+            <strong class="sm-value text-accent" id="sumConfirmed">0.00 kWh</strong>
+          </div>
+          <div class="summary-metric">
+            <span class="sm-label">Total Monthly Savings</span>
+            <strong class="sm-value text-success" id="sumSavings">0.00 kWh</strong>
+          </div>
+        </div>
+
+        <!-- Appliance breakdown table -->
+        <div class="summary-table-section">
+          <h3>Confirmed Daily Operating Schedule</h3>
+          <table class="data-table summary-table">
+            <thead>
+              <tr>
+                <th>Appliance</th>
+                <th>Power Rating</th>
+                <th>Original Usage</th>
+                <th>Confirmed Schedule</th>
+                <th style="text-align: right;">Planned Monthly Units</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody">
+              <!-- Summary rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Energy tips summary -->
+        <div class="summary-tips-box">
+          <h4>Key Action Items</h4>
+          <ul id="summaryTipsList"></ul>
+        </div>
+
+        <!-- Footer actions: JSON download and print -->
+        <div class="summary-footer-actions no-print">
+          <button type="button" class="btn btn-secondary" id="btnDownloadJson">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            Download Plan (JSON)
+          </button>
+          <button type="button" class="btn btn-primary" id="btnPrintPlan">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.656"/></svg>
+            Print Plan
+          </button>
+          <button type="button" class="btn btn-secondary" id="btnRestartPlan">
+            Create New Plan
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
